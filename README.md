@@ -3,63 +3,95 @@
 ![n8n](https://img.shields.io/badge/n8n-workflow-EA4B71?logo=n8n&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991?logo=openai&logoColor=white)
 ![Google Sheets](https://img.shields.io/badge/Data-Google%20Sheets-34A853?logo=googlesheets&logoColor=white)
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-portfolio%20demo-F1B64B)
 
-An n8n workflow that automates first-pass candidate screening: intake, CV parsing, deduplication, AI-assisted evaluation against job requirements, and pipeline tracking — with an explicit error path for CVs that fail to parse, instead of dropping them silently.
+An n8n portfolio workflow for first-pass candidate screening. It accepts a candidate submission, structures supplied CV text, routes extraction failures, records the candidate in Google Sheets, evaluates the submission against explicit job requirements, validates the AI response, and returns a clear webhook response.
 
-**[Watch the walkthrough →](https://youtu.be/3yUpuBxZmGA)**
+**[Open the visual project page →](./index.html)**  
+**[Watch the recorded walkthrough →](https://youtu.be/3yUpuBxZmGA)**
 
-## How it works
+## Evidence-backed scope
+
+The included export contains **13 n8n nodes** and two explicit completion paths:
+
+1. Webhook intake
+2. Candidate-data normalization
+3. Extraction quality check
+4. Candidate record creation in Google Sheets
+5. Job-requirement lookup
+6. Structured OpenAI screening analysis
+7. AI-output parsing and score validation
+8. Candidate record update
+9. Success response
+10. Failure logging, failed-record creation, and error response
+
+The workflow export contains no credential objects, API keys, personal candidate records, or private source documents. Google Sheet identifiers are placeholders.
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    A[Candidate Application Form<br/>Webhook] --> B[Extract & Structure CV<br/>Code]
-    B --> C{Extraction OK?}
-    C -- No --> D[Log Extraction Failure<br/>Code]
-    D --> E[Add Failed Record to Sheet]
-    E --> F[Confirm to Candidate — Error]
-    C -- Yes --> G[Check for Duplicates<br/>Code]
-    G --> H[Add to Candidate Pipeline<br/>Google Sheets]
-    H --> I[Load Job Requirements<br/>Code]
-    I --> J[AI Screening Analysis<br/>OpenAI]
-    J --> K[Parse AI Results<br/>Code]
-    K --> L[Update Candidate Record<br/>Google Sheets]
-    L --> M[Confirm to Candidate — Success]
+    A[Application webhook] --> B[Normalize supplied CV text]
+    B --> C{Extraction usable?}
+    C -- No --> D[Log failed extraction]
+    D --> E[Add failed record to Sheets]
+    E --> F[Return review response]
+    C -- Yes --> G[Normalize identity fields]
+    G --> H[Add candidate to Sheets]
+    H --> I[Load job requirements]
+    I --> J[Structured AI evaluation]
+    J --> K[Validate and clamp result]
+    K --> L[Update candidate record]
+    L --> M[Return success response]
 ```
 
-## Pipeline steps
+## What is implemented
 
-| # | Node | Type | Purpose |
-|---|------|------|---------|
-| 1 | Candidate Application Form | Webhook | Receives a candidate submission |
-| 2 | Extract & Structure CV | Code | Parses the raw submission into structured fields |
-| 3 | Extraction OK? | IF | Branches on whether parsing succeeded |
-| 4 | Check for Duplicates | Code | Prevents the same candidate being processed twice |
-| 5 | Add to Candidate Pipeline | Google Sheets | Logs the candidate into the tracking sheet |
-| 6 | Load Job Requirements | Code | Pulls in the criteria to screen against |
-| 7 | AI Screening Analysis | OpenAI | Evaluates the candidate against job requirements |
-| 8 | Parse AI Results | Code | Structures the AI's evaluation output |
-| 9 | Update Candidate Record | Google Sheets | Writes the evaluation back to the pipeline |
-| 10 | Log Extraction Failure → Add Failed Record | Code + Google Sheets | Error path for failed parses — logged, not dropped |
-| 11 | Confirm to Candidate (success / error) | Respond to Webhook | Sends a response back on either path |
+| Capability | Evidence in the export |
+|---|---|
+| Candidate intake | POST webhook with response handled by dedicated response nodes |
+| Structured candidate record | Code node normalizes form fields and supplied CV text |
+| Extraction failure path | Low-confidence input branches to failure logging and a separate response |
+| Pipeline persistence | Google Sheets append and update nodes |
+| Requirement-based scoring | Explicit role requirements are passed to an OpenAI evaluation node |
+| Structured AI output | JSON-only prompt plus parsing, normalization, and 0–100 score clamping |
+| Safer evaluation prompt | Prompt explicitly excludes protected characteristics from scoring |
 
-## Stack
+## Important limitations
 
-n8n • Webhooks • OpenAI • Google Sheets
+This is a working portfolio demonstration, not a production hiring system.
 
-## Design notes — what this is, and what it isn't
+- CV binary parsing is not included. The workflow expects supplied `cv_text`; missing or very short text is routed for review.
+- The duplicate-check node normalizes email, but its datastore lookup is still a documented placeholder and currently resolves `isDuplicate` to `false`.
+- AI output writes directly to the tracking sheet. A human approval gate should be added before an evaluation changes candidate status.
+- Google Sheets is suitable for a demonstration, not for sensitive candidate data at production scale.
+- A public deployment would need stronger input validation, authentication, rate limiting, retention controls, audit logging, and access control.
 
-This is a single-workflow demonstration of an AI-assisted screening pipeline: structured extraction from unstructured input, deduplication, AI-driven evaluation, and — the part most versions of this pattern skip — an explicit failure branch instead of silent drops.
+## Run it
 
-It is not a production hiring system, and I wouldn't represent it as one. Three specific things I'd change before letting it run unsupervised on real candidates:
+1. Import `workflow/cv_screening_n8n_workflow.json` into n8n.
+2. Replace `YOUR_GOOGLE_SHEET_ID` in the Google Sheets nodes.
+3. Attach your own Google Sheets and OpenAI credentials inside n8n.
+4. Supply extracted text as `cv_text`, or connect a document parser before the normalization node.
+5. Replace the placeholder duplicate logic with a datastore lookup.
+6. Activate the workflow and POST a test application to its webhook.
 
-- **Add a human-approval gate** before an AI verdict changes a candidate's status. Right now the AI's evaluation writes straight to the pipeline record with no review step.
-- **Move off Google Sheets** to a real datastore. Sheets works for a demo; it doesn't hold up under concurrent writes or handle candidate PII the way a proper database with access controls would.
-- **Add input validation and rate limiting** on the public intake webhook, and swap the custom-code CV extraction for a real document-parsing library so it holds up against messy real-world input, not just the clean case.
+## Repository structure
 
-## Run it yourself
+```text
+.
+├── index.html
+├── README.md
+└── workflow/
+    └── cv_screening_n8n_workflow.json
+```
 
-1. Import `cv_screening_n8n_workflow.json` into n8n
-2. Set your Google Sheet ID in the Google Sheets nodes
-3. Add your OpenAI credential
-4. Activate the workflow and POST a candidate submission to the webhook URL
+## Responsible use
+
+AI screening should support—not replace—human judgment. Before real hiring use, test for bias and false negatives, document decision criteria, provide a review/appeal path, minimize stored personal data, and keep a human accountable for every employment decision.
+
+---
+
+Designed and engineered by **Oyekola Ololade**\
+AI Systems & Integration Engineer\
+[oyekolaololade69@gmail.com](mailto:oyekolaololade69@gmail.com) · [LinkedIn](http://linkedin.com/in/ololade-oyekola-5b1797397)

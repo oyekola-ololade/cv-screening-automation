@@ -1,0 +1,437 @@
+{
+  "name": "CV Screening Automation - UK Recruitment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cv-screening-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "form-trigger-1",
+      "name": "Candidate Application Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "cv-screening-submit"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================\n// NODE 2 — CV EXTRACTION & DATA NORMALISATION\n// ============================================\nconst input = $input.first().json;\nconst body = input.body || input;\n\n// Extract CV file metadata from binary or form data\nconst cvFile = body.data?.cv_file || body.cv_file || {};\nconst fileName = cvFile.fileName || cvFile.name || \"cv-uploaded\";\nconst mimeType = cvFile.mimeType || cvFile.type || \"application/pdf\";\n\n// Extract text — in production, wire this to a PDF parser (e.g. CloudConvert, DocParser)\n// If your form sends pre-extracted text, use it. Otherwise flag for review.\nlet extractedText = body.cv_text || body.data?.cv_text || \"\";\nlet extractionConfidence = \"High\";\n\nif (!extractedText || extractedText.trim().length < 100) {\n    extractionConfidence = \"Low\";\n    extractedText = \"[EXTRACTION PENDING — Scanned PDF or image detected. Manual review required.]\";\n}\n\n// Normalise email for duplicate matching\nconst normalizedEmail = (body.email || \"\").toLowerCase().trim().replace(/\\s+/g, \"\");\n\n// Build the candidate record\nconst candidate = {\n    candidate_name: body.candidate_name || body.name || \"\",\n    email: body.email || \"\",\n    normalized_email: normalizedEmail,\n    phone: body.phone || \"\",\n    job_id: body.job_id || body.job_reference || \"\",\n    role_applied_for: body.role_applied_for || body.role || \"\",\n    years_of_experience: body.years_of_experience || null,\n    cv_file_link: fileName,\n    linkedin_url: body.linkedin_url || \"\",\n    github_url: body.github_url || \"\",\n    date_applied: $now.toISO(),\n    requirement_match_score: null,\n    constraint_pass_fail: null,\n    constraint_reason: null,\n    score_evidence: null,\n    extraction_confidence: extractionConfidence,\n    screening_status: extractionConfidence === \"Low\" ? \"Needs Review\" : \"Pending\",\n    status: \"New\",\n    duplicate_flag: false,\n    raw_extracted_summary: extractedText.substring(0, 3000),\n    last_updated_timestamp: $now.toISO(),\n    _extraction_failed: extractionConfidence === \"Low\" && !body.cv_text\n};\n\nreturn [{ json: candidate }];\n"
+      },
+      "id": "cv-extraction-2",
+      "name": "Extract & Structure CV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json._extraction_failed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-extraction-3",
+      "name": "Extraction OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        750,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================\n// NODE 3 — DUPLICATE CHECK\n// ============================================\n// In production: query your Google Sheet / Postgres / Airtable here.\n// This example shows the logic. Replace with an actual lookup node.\n\nconst candidate = $input.first().json;\n\n// TODO: Replace with Google Sheets 'Search Rows' or Postgres SELECT\n// Query by normalized_email = candidate.normalized_email\n// OR by phone + email combination\n\nconst isDuplicate = false; // Placeholder — implement actual lookup\n\nif (isDuplicate) {\n    candidate.duplicate_flag = true;\n    candidate.screening_status = \"Needs Review\";\n    candidate.constraint_reason = \"Possible duplicate — same email or phone+email combo found. Manual review required.\";\n}\n\nreturn [{ json: candidate }];\n"
+      },
+      "id": "duplicate-check-4",
+      "name": "Check for Duplicates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Name": "={{ $json.candidate_name }}",
+            "Email": "={{ $json.email }}",
+            "Phone": "={{ $json.phone }}",
+            "Job Reference": "={{ $json.job_id }}",
+            "Role Applied For": "={{ $json.role_applied_for }}",
+            "Years Experience": "={{ $json.years_of_experience }}",
+            "CV File": "={{ $json.cv_file_link }}",
+            "LinkedIn": "={{ $json.linkedin_url }}",
+            "GitHub": "={{ $json.github_url }}",
+            "Date Applied": "={{ $json.date_applied }}",
+            "Match Score": "={{ $json.requirement_match_score }}",
+            "Constraint Check": "={{ $json.constraint_pass_fail }}",
+            "Why Pass/Fail": "={{ $json.constraint_reason }}",
+            "Score Notes": "={{ $json.score_evidence }}",
+            "Extraction Quality": "={{ $json.extraction_confidence }}",
+            "Screening Status": "={{ $json.screening_status }}",
+            "Recruiter Status": "={{ $json.status }}",
+            "Duplicate?": "={{ $json.duplicate_flag }}",
+            "CV Summary": "={{ $json.raw_extracted_summary }}",
+            "Last Updated": "={{ $json.last_updated_timestamp }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "write-sheet-5",
+      "name": "Add to Candidate Pipeline",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1250,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================\n// JOB REQUIREMENTS LOOKUP\n// ============================================\n// Map job_id to explicit requirements & constraints.\n// In production, pull this from a Google Sheet or database.\n\nconst candidate = $input.first().json;\n\nconst jobRequirements = {\n    \"DEV-001\": {\n        \"role\": \"Senior Full-Stack Developer\",\n        \"required_skills\": [\"React\", \"Node.js\", \"TypeScript\", \"PostgreSQL\"],\n        \"min_years\": 5,\n        \"hard_constraints\": [\n            \"Must have UK right to work\",\n            \"Must be based within 50 miles of London\"\n        ]\n    },\n    \"DEV-002\": {\n        \"role\": \"Mid-Level Python Engineer\",\n        \"required_skills\": [\"Python\", \"Django\", \"AWS\", \"Docker\"],\n        \"min_years\": 3,\n        \"hard_constraints\": [\n            \"Must have UK right to work\"\n        ]\n    },\n    \"DEFAULT\": {\n        \"role\": candidate.role_applied_for || \"Unknown Role\",\n        \"required_skills\": [],\n        \"min_years\": 0,\n        \"hard_constraints\": []\n    }\n};\n\nconst req = jobRequirements[candidate.job_id] || jobRequirements[\"DEFAULT\"];\n\nreturn [{\n    json: {\n        ...candidate,\n        _job_requirements: req\n    }\n}];\n"
+      },
+      "id": "job-req-lookup",
+      "name": "Load Job Requirements",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {},
+        "prompt": "=You are an experienced technical recruiter screening CVs for a UK agency.\n\n=== JOB REQUIREMENTS ===\nRole: {{ $json._job_requirements.role }}\nRequired Skills: {{ $json._job_requirements.required_skills.join(', ') }}\nMinimum Years Experience: {{ $json._job_requirements.min_years }}\nHard Constraints (PASS/FAIL only):\n{{ $json._job_requirements.hard_constraints.map(c => '- ' + c).join('\\n') }}\n\n=== CANDIDATE ===\nName: {{ $json.candidate_name }}\nYears Experience: {{ $json.years_of_experience }}\nCV Summary:\n{{ $json.raw_extracted_summary }}\nLinkedIn: {{ $json.linkedin_url }}\nGitHub: {{ $json.github_url }}\n\n=== TASK ===\n1. Score the candidate 0-100 on requirement match (skills, experience, relevance). Use the full 0-100 range.\n2. Evaluate hard constraints: PASS if ALL constraints are met, FAIL if ANY are not.\n3. NEVER use nationality, race, age, gender, disability, or any protected characteristic in scoring.\n4. Output ONLY valid JSON — no markdown, no explanation outside the JSON.\n\n=== OUTPUT FORMAT ===\n{\"requirement_match_score\": <integer 0-100>, \"constraint_pass_fail\": \"PASS\" or \"FAIL\", \"constraint_reason\": \"<max 120 chars>\", \"score_evidence\": \"<2-3 sentences explaining the score>\"}"
+      },
+      "id": "openai-analysis-6",
+      "name": "AI Screening Analysis",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        1750,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================\n// PARSE STRUCTURED AI OUTPUT\n// ============================================\nconst aiResponse = $input.first().json;\nconst candidate = $input.first().json; // full candidate data is passed through\n\nlet parsed;\ntry {\n    const content = aiResponse.content || aiResponse.message?.content || aiResponse.choices?.[0]?.message?.content || \"{}\";\n    // Extract JSON block if wrapped in markdown\n    const jsonMatch = content.match(/\\{[\\s\\S]*?\\}/);\n    parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content);\n} catch (e) {\n    parsed = {\n        requirement_match_score: null,\n        constraint_pass_fail: \"FAIL\",\n        constraint_reason: \"AI response could not be parsed — manual review required\",\n        score_evidence: \"Parse error: \" + String(e.message).substring(0, 200)\n    };\n}\n\n// Validate and clamp score\nlet score = parsed.requirement_match_score;\nif (typeof score !== \"number\" || isNaN(score)) score = null;\nelse if (score < 0) score = 0;\nelse if (score > 100) score = 100;\n\n// Normalise constraint\nlet constraint = (parsed.constraint_pass_fail || \"\").toUpperCase();\nif (constraint !== \"PASS\" && constraint !== \"FAIL\") constraint = \"FAIL\";\n\nconst result = {\n    candidate_name: candidate.candidate_name,\n    email: candidate.email,\n    normalized_email: candidate.normalized_email,\n    phone: candidate.phone,\n    job_id: candidate.job_id,\n    role_applied_for: candidate.role_applied_for,\n    years_of_experience: candidate.years_of_experience,\n    cv_file_link: candidate.cv_file_link,\n    linkedin_url: candidate.linkedin_url,\n    github_url: candidate.github_url,\n    date_applied: candidate.date_applied,\n    requirement_match_score: score,\n    constraint_pass_fail: constraint,\n    constraint_reason: (parsed.constraint_reason || \"\").substring(0, 120),\n    score_evidence: (parsed.score_evidence || \"\").substring(0, 300),\n    extraction_confidence: candidate.extraction_confidence,\n    screening_status: \"Screened\",\n    status: candidate.status,\n    duplicate_flag: candidate.duplicate_flag,\n    raw_extracted_summary: candidate.raw_extracted_summary,\n    last_updated_timestamp: $now.toISO()\n};\n\nreturn [{ json: result }];\n"
+      },
+      "id": "parse-ai-7",
+      "name": "Parse AI Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Match Score": "={{ $json.requirement_match_score }}",
+            "Constraint Check": "={{ $json.constraint_pass_fail }}",
+            "Why Pass/Fail": "={{ $json.constraint_reason }}",
+            "Score Notes": "={{ $json.score_evidence }}",
+            "Screening Status": "={{ $json.screening_status }}",
+            "Last Updated": "={{ $json.last_updated_timestamp }}"
+          }
+        },
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        },
+        "dataMode": "defineBelow"
+      },
+      "id": "update-sheet-8",
+      "name": "Update Candidate Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        2250,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================\n// ERROR HANDLING — Extraction Failed Branch\n// ============================================\nconst input = $input.first().json;\n\nconst errorRecord = {\n    candidate_name: input.candidate_name || \"Unknown\",\n    email: input.email || \"\",\n    phone: input.phone || \"\",\n    job_id: input.job_id || \"\",\n    role_applied_for: input.role_applied_for || \"\",\n    date_applied: $now.toISO(),\n    screening_status: \"Extraction Failed\",\n    status: \"New\",\n    score_evidence: \"CV text could not be extracted. Likely causes: scanned image PDF, corrupted file, or unsupported format.\",\n    last_updated_timestamp: $now.toISO()\n};\n\nreturn [{ json: errorRecord }];\n"
+      },
+      "id": "error-extraction-9",
+      "name": "Log Extraction Failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Name": "={{ $json.candidate_name }}",
+            "Email": "={{ $json.email }}",
+            "Phone": "={{ $json.phone }}",
+            "Job Reference": "={{ $json.job_id }}",
+            "Role Applied For": "={{ $json.role_applied_for }}",
+            "Date Applied": "={{ $json.date_applied }}",
+            "Screening Status": "={{ $json.screening_status }}",
+            "Recruiter Status": "={{ $json.status }}",
+            "Score Notes": "={{ $json.score_evidence }}",
+            "Last Updated": "={{ $json.last_updated_timestamp }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "write-error-10",
+      "name": "Add Failed Record to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1250,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {},
+        "responseBody": "={\"status\": \"success\", \"message\": \"Thank you — your application has been received and is being reviewed by our team.\"}"
+      },
+      "id": "respond-success-11",
+      "name": "Confirm to Candidate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {},
+        "responseBody": "={\"status\": \"success\", \"message\": \"Thank you — your application has been received. We will be in touch if we need any further information.\"}"
+      },
+      "id": "respond-error-12",
+      "name": "Confirm to Candidate (Error)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        450
+      ]
+    }
+  ],
+  "connections": {
+    "Candidate Application Form": {
+      "main": [
+        [
+          {
+            "node": "Extract & Structure CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract & Structure CV": {
+      "main": [
+        [
+          {
+            "node": "Extraction OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraction OK?": {
+      "main": [
+        [
+          {
+            "node": "Check for Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Extraction Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Add to Candidate Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Candidate Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Load Job Requirements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Job Requirements": {
+      "main": [
+        [
+          {
+            "node": "AI Screening Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Screening Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Results": {
+      "main": [
+        [
+          {
+            "node": "Update Candidate Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Candidate Record": {
+      "main": [
+        [
+          {
+            "node": "Confirm to Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Extraction Failure": {
+      "main": [
+        [
+          {
+            "node": "Add Failed Record to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Failed Record to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Confirm to Candidate (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 120,
+    "errorWorkflow": ""
+  },
+  "tags": [
+    "recruitment",
+    "cv-screening",
+    "uk",
+    "production"
+  ],
+  "staticData": null,
+  "pinData": {}
+}
+
