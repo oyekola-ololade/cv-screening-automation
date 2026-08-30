@@ -90,6 +90,10 @@ This is a working portfolio demonstration, not a production hiring system.
 
 AI screening should support—not replace—human judgment. Before real hiring use, test for bias and false negatives, document decision criteria, provide a review/appeal path, minimize stored personal data, and keep a human accountable for every employment decision.
 
+## License
+
+This project is available under the [MIT License](./LICENSE).
+
 ---
 
 Designed and engineered by **Oyekola Ololade**\
