@@ -1,8 +1,19 @@
 # Candidate Screening v2.0 — Proposed Repair Target
 
+[← Main README](../../README.md) · [Proposed architecture](ARCHITECTURE.md)
+
 **Status:** PROPOSED / REPAIR TARGET · **not implemented**
 
+## Contents
+
+- [Target architecture](#target-architecture)
+- [Required repair outcomes](#required-repair-outcomes)
+- [Promotion gate](#promotion-gate)
+- [Media](#media)
+
 ## Target architecture
+
+[Open the proposed v2 architecture →](ARCHITECTURE.md)
 
 The repair specification defines a corrected flow around:
 
