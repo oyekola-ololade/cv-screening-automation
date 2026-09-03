@@ -12,6 +12,27 @@ A **partial n8n portfolio implementation under repair** for first-pass candidate
 
 <p align="center"><img src="assets/current-vs-target.svg" width="100%" alt="Candidate Screening current defective flow versus proposed v2 repair target"></p>
 
+## Table of contents
+
+- [Current status](#current-status)
+- [Version / generation history](#version--generation-history)
+- [What the current export proves](#what-the-current-export-does-prove)
+- [Intended repair architecture](#intended-repair-architecture)
+- [Required repair before reclassification](#required-repair-before-reclassification)
+- [Important limitations](#important-limitations)
+- [Repository structure](#repository-structure)
+- [Responsible use](#responsible-use)
+
+### Generation / architecture quick links
+
+| Generation | Status | README | Architecture |
+|---|---|---|---|
+| Historical demonstrated flow | Historical execution evidence | [open](versions/historical-demonstrated/README.md) | [reconstructed historical diagram](versions/historical-demonstrated/ARCHITECTURE.md) |
+| Current checked-in flow | **Current · under repair** | [open](versions/current-under-repair/README.md) | [current diagnostic diagram](versions/current-under-repair/ARCHITECTURE.md) |
+| v2 repair target | Proposed · not implemented | [open](versions/v2-proposed/README.md) | [proposed architecture](versions/v2-proposed/ARCHITECTURE.md) |
+
+The historical diagram is explicitly reconstructed from the historical walkthrough/documentation because a standalone historical n8n screenshot was not recovered. The current and proposed diagrams remain separate so the repair target cannot be mistaken for current proof.
+
 ## Current status
 
 **Classification:** partial/broken implementation asset under repair.
@@ -23,6 +44,16 @@ Three defects prevent the current export from being presented as a verified work
 3. **Candidate state is not preserved reliably through the AI-output path.** The final update can lose the original candidate context/reference.
 
 Until those issues are repaired and rerun with representative synthetic data, this repository is evidence of an implementation plus engineering diagnosis—not evidence of a completed recruiter workflow.
+
+## Version / generation history
+
+The repository separates three different truths:
+
+1. **Historical demonstrated generation** — a prior screening flow was shown working in a walkthrough. That does not prove the current export.
+2. **Current checked-in generation** — a real 13-node export with the defects documented above.
+3. **Proposed v2 repair target** — a corrected architecture/specification that is not implemented yet.
+
+Each generation has its own README and architecture page under [`versions/`](versions/).
 
 ## What the current export does prove
 
@@ -83,17 +114,31 @@ See:
 
 ```text
 .
+├── README.md
 ├── assets/
 │   └── current-vs-target.svg
 ├── docs/
 │   ├── REPAIR_PLAN.md
 │   └── TEST_PLAN.md
+├── versions/
+│   ├── historical-demonstrated/
+│   │   ├── README.md
+│   │   └── ARCHITECTURE.md
+│   ├── current-under-repair/
+│   │   ├── README.md
+│   │   └── ARCHITECTURE.md
+│   └── v2-proposed/
+│       ├── README.md
+│       └── ARCHITECTURE.md
 ├── workflow/
 │   └── cv_screening_n8n_workflow.json
+├── evidence/current/
+│   ├── demo/README.md
+│   └── screenshots/README.md
 ├── index.html
 ├── SECURITY.md
 ├── LICENSE
-└── README.md
+└── CHANGELOG.md
 ```
 
 ## Responsible use
