@@ -1,10 +1,27 @@
 # Candidate Screening — Current Checked-In Generation
 
+[← Main README](../../README.md) · [Current diagnostic architecture](ARCHITECTURE.md)
+
 **Status:** **CURRENT · UNDER REPAIR · not buyer-ready**
+
+## Contents
+
+- [Current artifact](#current-artifact)
+- [Architecture](#architecture)
+- [Implemented/evidenced components](#implementedevidenced-components)
+- [Known defects](#known-defects)
+- [Current proof boundary](#current-proof-boundary)
+- [Media](#media)
 
 ## Current artifact
 
 The checked-in generation is a real 13-node n8n workflow export. Inspection found useful implementation components alongside defects that invalidate an end-to-end “working demo” claim.
+
+## Architecture
+
+[Open the current defective-flow architecture →](ARCHITECTURE.md)
+
+The diagram explicitly marks the reversed extraction routing, placeholder duplicate logic, and state-continuity risk. It is diagnostic architecture, not a successful-runtime screenshot.
 
 ## Implemented/evidenced components
 
