@@ -2,297 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Evidence-backed project page for a 13-node n8n candidate-screening portfolio workflow.">
-  <meta name="color-scheme" content="dark">
-  <title>CV Screening Automation — Project Evidence</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Evidence-led diagnostic page for the Candidate Screening n8n workflow currently under repair.">
+  <title>Candidate Screening — Under Repair</title>
   <style>
-    :root {
-      --ink: #f7f4ed;
-      --muted: #a9a6a0;
-      --paper: #0b0c10;
-      --panel: #12141a;
-      --line: rgba(255,255,255,.12);
-      --amber: #f1b64b;
-      --amber-soft: rgba(241,182,75,.13);
-      --violet: #9a88ff;
-      --green: #77d7a0;
-      --red: #ff8f82;
-      --radius: 22px;
-      --shadow: 0 26px 80px rgba(0,0,0,.38);
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 78% 3%, rgba(154,136,255,.15), transparent 31rem),
-        radial-gradient(circle at 8% 24%, rgba(241,182,75,.11), transparent 28rem),
-        var(--paper);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.55;
-    }
-
-    a { color: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    .wrap { width: min(1160px, calc(100% - 36px)); margin: 0 auto; }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 76px;
-      border-bottom: 1px solid var(--line);
-    }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 740; letter-spacing: -.02em; }
-    .brand-mark {
-      width: 34px; height: 34px; display: grid; place-items: center;
-      border: 1px solid rgba(241,182,75,.5); border-radius: 11px;
-      background: linear-gradient(145deg, rgba(241,182,75,.21), rgba(154,136,255,.11));
-      color: var(--amber); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    .nav-tag { color: var(--muted); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.08fr .92fr;
-      gap: 54px;
-      align-items: center;
-      padding: 92px 0 78px;
-    }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 9px;
-      padding: 7px 11px; border: 1px solid rgba(119,215,160,.3);
-      border-radius: 999px; color: #c8f4d8; background: rgba(119,215,160,.08);
-      font-size: .76rem; font-weight: 760; letter-spacing: .09em; text-transform: uppercase;
-    }
-    .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 18px var(--green); }
-    h1 { margin: 22px 0 18px; font-size: clamp(3rem, 7vw, 6.6rem); line-height: .94; letter-spacing: -.075em; max-width: 820px; }
-    h1 span { color: var(--amber); }
-    .lede { max-width: 680px; margin: 0; color: #c5c2bb; font-size: clamp(1rem, 1.8vw, 1.24rem); }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-      min-height: 46px; padding: 0 18px; border: 1px solid var(--line); border-radius: 13px;
-      text-decoration: none; font-weight: 720; transition: transform .18s ease, border-color .18s ease, background .18s ease;
-    }
-    .btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.28); }
-    .btn-primary { background: var(--ink); color: #111216; border-color: transparent; }
-    .btn-ghost { background: rgba(255,255,255,.035); }
-
-    .evidence-card {
-      position: relative; overflow: hidden; padding: 26px;
-      border: 1px solid var(--line); border-radius: 28px;
-      background: linear-gradient(150deg, rgba(255,255,255,.065), rgba(255,255,255,.018));
-      box-shadow: var(--shadow);
-    }
-    .evidence-card::after {
-      content: ""; position: absolute; width: 210px; height: 210px; right: -90px; top: -105px;
-      border: 38px solid rgba(154,136,255,.09); border-radius: 50%;
-    }
-    .card-kicker { color: var(--muted); font-size: .76rem; letter-spacing: .11em; text-transform: uppercase; }
-    .metric { display: flex; align-items: flex-end; gap: 12px; margin: 10px 0 4px; }
-    .metric strong { font-size: 5.2rem; line-height: .9; letter-spacing: -.07em; }
-    .metric span { color: var(--amber); font-weight: 750; padding-bottom: 8px; }
-    .checks { display: grid; gap: 10px; margin-top: 24px; }
-    .check { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid var(--line); color: var(--muted); }
-    .check b { color: var(--ink); font-weight: 670; text-align: right; }
-
-    .section { padding: 84px 0; border-top: 1px solid var(--line); }
-    .section-head { display: grid; grid-template-columns: .7fr 1.3fr; gap: 30px; align-items: end; margin-bottom: 34px; }
-    .label { color: var(--amber); font-size: .77rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-    h2 { margin: 4px 0 0; font-size: clamp(2rem, 4.2vw, 4rem); line-height: 1; letter-spacing: -.055em; }
-    .section-head p { margin: 0; color: var(--muted); max-width: 670px; }
-
-    .architecture { padding: 8px 0 4px; }
-    .flow-entry {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 38px;
-      max-width: 900px; margin: 0 auto;
-    }
-    .flow-node {
-      position: relative; min-height: 132px; padding: 20px;
-      border: 1px solid var(--line); border-radius: 18px; background: var(--panel);
-    }
-    .flow-node:not(:last-child)::after {
-      content: "→"; position: absolute; right: -29px; top: 50%; transform: translateY(-50%);
-      color: var(--amber); font: 700 1.2rem ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    .node-id { color: var(--violet); font: 700 .76rem ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .flow-node h3 { margin: 22px 0 5px; font-size: 1.02rem; }
-    .flow-node p { margin: 0; color: var(--muted); font-size: .87rem; }
-    .decision {
-      width: min(430px, 100%); margin: 38px auto; padding: 19px 24px;
-      border: 1px solid rgba(241,182,75,.42); border-radius: 999px;
-      background: var(--amber-soft); text-align: center; font-weight: 760;
-      position: relative;
-    }
-    .decision::before, .decision::after {
-      content: ""; position: absolute; left: 50%; width: 1px; height: 39px;
-      background: linear-gradient(var(--line), var(--amber));
-    }
-    .decision::before { bottom: 100%; }
-    .decision::after { top: 100%; background: linear-gradient(var(--amber), var(--line)); }
-    .flow-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 52px; }
-    .flow-path {
-      padding: 24px; border: 1px solid var(--line); border-radius: 22px;
-      background: rgba(255,255,255,.025); position: relative;
-    }
-    .flow-path::before {
-      content: ""; position: absolute; top: -30px; width: calc(50% + 12px); height: 30px;
-      border-top: 1px solid var(--line);
-    }
-    .flow-path.success { border-color: rgba(119,215,160,.28); }
-    .flow-path.failure { border-color: rgba(255,143,130,.28); }
-    .flow-path.success::before { right: 50%; border-right: 1px solid var(--line); border-radius: 0 13px 0 0; }
-    .flow-path.failure::before { left: 50%; border-left: 1px solid var(--line); border-radius: 13px 0 0 0; }
-    .path-title { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-weight: 780; }
-    .path-title .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-    .success .path-title { color: var(--green); }
-    .failure .path-title { color: var(--red); }
-    .path-steps { display: grid; gap: 9px; }
-    .path-step {
-      display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center;
-      padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel);
-    }
-    .path-step span { color: var(--muted); font: 700 .72rem ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .path-step b { font-size: .9rem; }
-
-    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .feature { padding: 24px; min-height: 210px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.025); }
-    .feature-num { color: var(--violet); font: 700 .82rem ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .feature h3 { margin: 38px 0 9px; font-size: 1.12rem; }
-    .feature p { margin: 0; color: var(--muted); font-size: .94rem; }
-
-    .footer { padding: 42px 0 64px; border-top: 1px solid var(--line); color: var(--muted); }
-    .footer-row { display: flex; justify-content: space-between; gap: 22px; align-items: center; }
-    .footer-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 18px; }
-    .footer strong { color: var(--ink); }
-    .footer a { color: var(--amber); text-underline-offset: 4px; }
-
-    @media (max-width: 860px) {
-      .hero, .section-head { grid-template-columns: 1fr; }
-      .hero { gap: 34px; padding-top: 64px; }
-      .feature-grid { grid-template-columns: 1fr 1fr; }
-      .section-head { align-items: start; }
-    }
-    @media (max-width: 600px) {
-      .wrap { width: min(100% - 24px, 1160px); }
-      .nav-tag { display: none; }
-      h1 { font-size: clamp(3rem, 18vw, 5rem); }
-      .hero { padding: 52px 0 62px; }
-      .section { padding: 64px 0; }
-      .feature-grid, .flow-entry, .flow-paths { grid-template-columns: 1fr; }
-      .flow-entry { gap: 30px; }
-      .flow-node:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -27px; transform: translateX(50%); }
-      .decision { border-radius: 18px; }
-      .flow-paths { gap: 16px; margin-top: 46px; }
-      .flow-path::before { display: none; }
-      .footer-row { align-items: flex-start; flex-direction: column; }
-      .footer-links { justify-content: flex-start; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .btn { transition: none; }
-    }
+    :root{--bg:#090b10;--panel:#121620;--line:#293142;--text:#f4f6fb;--muted:#aab2c0;--amber:#f1b64b;--red:#ff8f82;--green:#7bddaa;--violet:#9a88ff}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#211937 0,transparent 35rem),var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,sans-serif}
+    main{width:min(1120px,92vw);margin:auto;padding:72px 0}.eyebrow{color:var(--amber);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.78rem}
+    h1{font-size:clamp(3rem,9vw,6.5rem);line-height:.92;margin:.25em 0}.lead{max-width:820px;color:var(--muted);font-size:1.15rem}.status{display:inline-block;border:1px solid #7d5720;background:#251b0c;color:#ffd98f;padding:.45rem .8rem;border-radius:999px;font-weight:800}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin:42px 0}.card{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(145deg,#151a25,#0e1118);border-radius:18px;padding:24px}.wide{grid-column:span 12}.half{grid-column:span 6}
+    .bad{border-color:#62322f}.good{border-color:#2a6445}.muted{color:var(--muted)}h2,h3{margin-top:0}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.node{border:1px solid var(--line);padding:15px;border-radius:12px;text-align:center;background:#0d121a}.warn{color:var(--red);font-weight:800}.ok{color:var(--green);font-weight:800}code{color:#d8d1ff}a{color:#b9adff}ul{padding-left:1.2rem}footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted)}
+    @media(max-width:800px){.card,.half{grid-column:span 12}.flow{grid-template-columns:1fr}}
   </style>
 </head>
-<body>
-  <header class="wrap nav">
-    <div class="brand"><span class="brand-mark">CV</span> Screening Automation</div>
-    <div class="nav-tag">Verified portfolio evidence · 2026</div>
-  </header>
+<body><main>
+  <div class="eyebrow">Oyekola Ololade · Engineering diagnosis</div>
+  <h1>Candidate Screening</h1>
+  <p class="lead">A real 13-node n8n implementation with meaningful screening logic, persistence nodes, AI evaluation, and response paths — but the current checked-in export contains known defects and is being treated as an engineering repair project, not a verified working demo.</p>
+  <span class="status">Partial implementation · Under repair</span>
 
-  <main>
-    <section class="wrap hero" aria-labelledby="page-title">
-      <div>
-        <div class="eyebrow">Portfolio demonstration</div>
-        <h1 id="page-title">Candidate screening, with the <span>failure path</span> included.</h1>
-        <p class="lede">A 13-node n8n workflow that turns supplied candidate data into a structured, requirement-based screening record—and routes unusable CV text for review instead of silently dropping it.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="workflow/cv_screening_n8n_workflow.json">Inspect workflow ↗</a>
-          <a class="btn btn-ghost" href="https://youtu.be/3yUpuBxZmGA">Watch walkthrough ↗</a>
-        </div>
+  <section class="grid">
+    <article class="card"><h3>13 nodes</h3><p class="muted">Inspectable n8n workflow export with webhook intake, Google Sheets persistence, AI evaluation and response paths.</p></article>
+    <article class="card bad"><h3 class="warn">3 blocking defects</h3><p class="muted">Routing reversal, placeholder duplicate handling, and candidate-state continuity failure.</p></article>
+    <article class="card"><h3>Historical walkthrough</h3><p class="muted">Retained as historical evidence only. It is not current verification.</p></article>
+
+    <article class="card wide bad"><h2>Current checked-in workflow — diagnostic view</h2>
+      <div class="flow">
+        <div class="node">Webhook intake</div><div class="node">Normalize supplied <code>cv_text</code></div><div class="node">Extraction decision</div><div class="node">Duplicate decision</div><div class="node">AI → persistence</div>
       </div>
+      <ul>
+        <li><span class="warn">Routing defect:</span> the extraction condition can send failed extraction into the screening path while valid extraction follows the failure route.</li>
+        <li><span class="warn">Duplicate defect:</span> email normalization exists, but the duplicate decision currently resolves to placeholder/hard-coded false rather than an authoritative datastore lookup.</li>
+        <li><span class="warn">State defect:</span> the original candidate object is not reliably preserved through AI evaluation into the final update operation.</li>
+      </ul>
+    </article>
 
-      <aside class="evidence-card" aria-label="Verified project summary">
-        <div class="card-kicker">Direct export evidence</div>
-        <div class="metric"><strong>13</strong><span>n8n nodes</span></div>
-        <div class="checks">
-          <div class="check"><span>Persistence</span><b>Google Sheets</b></div>
-          <div class="check"><span>Evaluation</span><b>Structured AI output</b></div>
-          <div class="check"><span>Failure handling</span><b>Explicit branch</b></div>
-          <div class="check"><span>Credentials in export</span><b>None</b></div>
-        </div>
-      </aside>
-    </section>
+    <article class="card half good"><h2>What the file does prove</h2><ul>
+      <li>Webhook-based candidate intake exists.</li><li>Candidate fields and supplied text are normalized.</li><li>Google Sheets append/update nodes exist.</li><li>Role requirements are provided to an AI evaluation step.</li><li>Structured output parsing and score clamping exist.</li><li>Explicit success and failure response nodes exist.</li>
+    </ul></article>
 
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head">
-          <div><div class="label">System flow</div><h2>From intake to review.</h2></div>
-          <p>The workflow separates input handling, persistence, AI evaluation, and response logic. Its strongest design choice is the visible failure route: bad extraction becomes a reviewable record rather than a missing candidate.</p>
-        </div>
-        <div class="architecture" aria-label="Workflow architecture with success and failure paths">
-          <div class="flow-entry">
-            <article class="flow-node"><div class="node-id">01 / TRIGGER</div><h3>Application webhook</h3><p>Receives candidate fields and supplied CV text.</p></article>
-            <article class="flow-node"><div class="node-id">02 / NORMALIZE</div><h3>Prepare candidate data</h3><p>Creates a consistent object for downstream nodes.</p></article>
-            <article class="flow-node"><div class="node-id">03 / CONTROL</div><h3>Assess extraction</h3><p>Checks whether the available text is usable.</p></article>
-          </div>
-          <div class="decision">Is the supplied CV text usable?</div>
-          <div class="flow-paths">
-            <article class="flow-path success">
-              <div class="path-title"><span class="dot"></span>Yes — screening path</div>
-              <div class="path-steps">
-                <div class="path-step"><span>04</span><b>Add candidate to Google Sheets</b></div>
-                <div class="path-step"><span>05</span><b>Load job requirements</b></div>
-                <div class="path-step"><span>06</span><b>Run structured AI evaluation</b></div>
-                <div class="path-step"><span>07</span><b>Validate and clamp output</b></div>
-                <div class="path-step"><span>08</span><b>Update record and return success</b></div>
-              </div>
-            </article>
-            <article class="flow-path failure">
-              <div class="path-title"><span class="dot"></span>No — review path</div>
-              <div class="path-steps">
-                <div class="path-step"><span>04</span><b>Log the extraction failure</b></div>
-                <div class="path-step"><span>05</span><b>Add failed record to Google Sheets</b></div>
-                <div class="path-step"><span>06</span><b>Return a manual-review response</b></div>
-              </div>
-            </article>
-          </div>
-        </div>
+    <article class="card half"><h2>What it does not prove</h2><ul>
+      <li>Reliable end-to-end execution in the current export.</li><li>Real duplicate detection.</li><li>Binary PDF/image CV parsing.</li><li>Production-safe candidate-data handling.</li><li>Autonomous hiring decisions or production compliance.</li>
+    </ul></article>
+
+    <article class="card wide good"><h2>v2 repair target</h2>
+      <div class="flow">
+        <div class="node">Intake + validation</div><div class="node">Extraction confidence gate</div><div class="node">Authoritative duplicate lookup</div><div class="node">Preserved candidate state + AI schema validation</div><div class="node">Human review + audited response</div>
       </div>
-    </section>
+      <p class="muted">This is a repair target, not a claim that v2 has already been implemented. Reclassification requires an actual repaired export plus representative success/failure/duplicate/state-continuity tests.</p>
+    </article>
+  </section>
 
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head">
-          <div><div class="label">Implemented</div><h2>What the file proves.</h2></div>
-          <p>Every item below maps to a named node or explicit code path in the sanitized workflow export.</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature"><div class="feature-num">A / INTAKE</div><h3>Structured candidate record</h3><p>Form fields and supplied CV text are normalized into a consistent object for downstream steps.</p></article>
-          <article class="feature"><div class="feature-num">B / CONTROL</div><h3>Extraction confidence route</h3><p>Missing or insufficient text is marked low confidence and redirected to a dedicated failure path.</p></article>
-          <article class="feature"><div class="feature-num">C / DATA</div><h3>Two-stage sheet updates</h3><p>A candidate is appended before evaluation, then updated with the validated screening result.</p></article>
-          <article class="feature"><div class="feature-num">D / AI</div><h3>Explicit scoring contract</h3><p>The prompt requests JSON with a 0–100 match score, pass/fail constraint result, reason, and evidence.</p></article>
-          <article class="feature"><div class="feature-num">E / SAFETY</div><h3>Protected traits excluded</h3><p>The evaluation prompt instructs the model not to use protected characteristics in scoring.</p></article>
-          <article class="feature"><div class="feature-num">F / VALIDATION</div><h3>Defensive result parsing</h3><p>Output is parsed, normalized, length-limited, and score-clamped before persistence.</p></article>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <footer class="footer">
-    <div class="wrap footer-row">
-      <div><strong>Oyekola Ololade</strong><br>AI Systems & Integration Engineer</div>
-      <div class="footer-links">
-        <a href="mailto:oyekolaololade69@gmail.com">oyekolaololade69@gmail.com</a>
-        <a href="http://linkedin.com/in/ololade-oyekola-5b1797397">LinkedIn</a>
-        <a href="README.md">Technical notes</a>
-      </div>
-    </div>
-  </footer>
-</body>
-</html>
+  <p><a href="README.md">Read the technical evidence and limitations →</a> · <a href="docs/REPAIR_PLAN.md">Open the repair plan →</a> · <a href="https://youtu.be/3yUpuBxZmGA">Historical walkthrough →</a></p>
+  <footer>AI-assisted screening should support, not replace, accountable human hiring decisions.</footer>
+</main></body></html>
