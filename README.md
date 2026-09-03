@@ -5,108 +5,100 @@
 ![Google Sheets](https://img.shields.io/badge/Data-Google%20Sheets-34A853?logo=googlesheets&logoColor=white)
 ![Status](https://img.shields.io/badge/status-partial%20%2F%20under%20repair-F1B64B)
 
-A **partial n8n portfolio implementation under repair** for first-pass candidate screening. The repository contains a 13-node workflow export, structured AI evaluation logic, Google Sheets persistence nodes, and explicit success/failure response paths, but the current workflow should **not** be treated as a working demo or production-ready hiring system.
+A **partial n8n portfolio implementation under repair** for first-pass candidate screening. The repository contains a 13-node workflow export, structured AI evaluation logic, Google Sheets persistence nodes, and explicit success/failure response paths, but the current workflow must **not** be treated as a working demo or production-ready hiring system.
 
-**[Open the visual project page →](./index.html)**  
+**[Open the visual diagnostic page →](./index.html)**  
 **[Historical walkthrough — not current verification →](https://youtu.be/3yUpuBxZmGA)**
+
+<p align="center"><img src="assets/current-vs-target.svg" width="100%" alt="Candidate Screening current defective flow versus proposed v2 repair target"></p>
 
 ## Current status
 
 **Classification:** partial/broken implementation asset under repair.
 
-The current export contains meaningful implementation evidence, but three defects prevent it from being presented as a verified working workflow:
+Three defects prevent the current export from being presented as a verified working workflow:
 
-1. **Extraction branch logic is reversed.** The current condition can route failed extraction into the screening path while valid extraction follows the failure path.
-2. **Duplicate handling is placeholder logic.** Email normalization exists, but the duplicate check currently resolves `isDuplicate` to `false` rather than performing a real datastore lookup.
-3. **Candidate state is not preserved correctly through the AI-output path.** The evaluation/update path can lose the original candidate context required for a reliable record update.
+1. **Extraction branch logic is reversed.** Failed extraction can be routed into screening while valid extraction follows the failure path.
+2. **Duplicate handling is placeholder logic.** Email normalization exists, but the duplicate decision resolves to false rather than performing an authoritative datastore lookup.
+3. **Candidate state is not preserved reliably through the AI-output path.** The final update can lose the original candidate context/reference.
 
-Until those issues are repaired and the workflow is rerun with representative test data, this repository is evidence of an implementation in progress—not evidence of a completed recruiter workflow.
+Until those issues are repaired and rerun with representative synthetic data, this repository is evidence of an implementation plus engineering diagnosis—not evidence of a completed recruiter workflow.
 
-## Evidence-backed scope
+## What the current export does prove
 
-The included export contains **13 n8n nodes** and intended success/failure completion paths covering:
+- POST webhook intake and dedicated response nodes exist.
+- Candidate fields and supplied `cv_text` are normalized.
+- Google Sheets append/update nodes exist.
+- Role requirements are supplied to a structured AI-evaluation step.
+- AI output parsing, score validation/clamping, and explicit success/failure response nodes exist.
+- The public export contains no real candidate records or reusable production credentials.
 
-1. Webhook intake
-2. Candidate-data normalization
-3. Extraction quality check
-4. Candidate record creation in Google Sheets
-5. Job-requirement lookup
-6. Structured OpenAI screening analysis
-7. AI-output parsing and score validation
-8. Candidate record update
-9. Success response
-10. Failure logging, failed-record creation, and error response
-
-The workflow export contains no credential objects, API keys, personal candidate records, or private source documents. Google Sheet identifiers are placeholders.
-
-## Intended architecture
-
-> The diagram below describes the intended workflow design. It should not be read as proof that the current export executes this path correctly end to end.
+## Intended repair architecture
 
 ```mermaid
 flowchart TD
-    A[Application webhook] --> B[Normalize supplied CV text]
-    B --> C{Extraction usable?}
-    C -- No --> D[Log failed extraction]
-    D --> E[Add failed record to Sheets]
-    E --> F[Return review response]
-    C -- Yes --> G[Normalize identity fields]
-    G --> H[Add candidate to Sheets]
-    H --> I[Load job requirements]
-    I --> J[Structured AI evaluation]
-    J --> K[Validate and clamp result]
-    K --> L[Update candidate record]
-    L --> M[Return success response]
+    A[Candidate intake] --> B[Validate required fields]
+    B --> C[Accept / extract cv_text]
+    C --> D{Extraction usable?}
+    D -->|No| E[Persist failure + review/retry response]
+    D -->|Yes| F[Normalize candidate identity]
+    F --> G[Authoritative duplicate lookup]
+    G --> H{Existing candidate?}
+    H -->|Yes| I[Return duplicate/existing-record response]
+    H -->|No| J[Create + preserve candidate object]
+    J --> K[Load job requirements]
+    K --> L[Structured AI evaluation]
+    L --> M[Schema validate + clamp]
+    M --> N[Merge with original candidate state]
+    N --> O[Update the correct candidate record]
+    O --> P[Human review gate]
+    P --> Q[Audited response]
 ```
 
-## What is present in the export
-
-| Capability | Current evidence / limitation |
-|---|---|
-| Candidate intake | POST webhook and dedicated response nodes are present |
-| Candidate-data normalization | Code node structures form fields and supplied CV text |
-| Extraction decision | Condition node is present, but its current branch behavior needs repair |
-| Google Sheets persistence | Append/update nodes are present, but end-to-end state propagation must be repaired and verified |
-| Requirement-based scoring | Explicit role requirements are passed to an OpenAI evaluation node |
-| Structured AI output | JSON-oriented evaluation and score normalization logic are present |
-| Duplicate handling | Email normalization exists; actual datastore duplicate lookup is still placeholder logic |
-| Human review boundary | Real hiring use still requires a human review/approval gate |
+**This is a repair target, not the current implementation.**
 
 ## Required repair before reclassification
 
-This project should only be reclassified as a working demo after all of the following are completed and evidenced:
+- Fix extraction success/failure routing.
+- Replace placeholder duplicate logic with an actual lookup or remove the duplicate claim.
+- Preserve candidate identity/state through AI evaluation and final persistence.
+- Configure representative synthetic test resources.
+- Execute valid, failed-input, duplicate, malformed-AI-output, replay, and state-continuity cases.
+- Capture actual execution evidence and write `TEST_RESULTS.md` only after those runs occur.
 
-- Repair the extraction condition and verify correct success/failure routing.
-- Replace the placeholder duplicate check with a real lookup or remove the unsupported duplicate-detection claim.
-- Preserve the original candidate state through AI evaluation and the final record update.
-- Configure the workflow with representative test data and non-placeholder test resources.
-- Run successful and failed-input cases and capture execution evidence.
-- Verify that the correct candidate record is updated with the correct evaluation output.
+See:
+
+- [v2 repair contract](docs/REPAIR_PLAN.md)
+- [test plan](docs/TEST_PLAN.md)
+- [security and responsible use](SECURITY.md)
 
 ## Important limitations
 
-- This is **not currently a working demo** and is **not production-ready**.
-- CV binary parsing is not included; the workflow expects supplied `cv_text` or an upstream parser.
-- Google Sheets is demonstration-oriented storage and is not appropriate for sensitive candidate data at production scale without a broader security and governance design.
-- A production implementation would also require stronger input validation, authentication, rate limiting, retention controls, audit logging, access control, and an explicit human decision boundary.
+- **Not currently a working demo and not production-ready.**
+- Binary PDF/image CV parsing is not included; the workflow expects supplied `cv_text` or an upstream parser.
+- Google Sheets is demonstration-oriented storage and is not appropriate for sensitive candidate data at production scale without a wider security/governance design.
+- Real hiring requires accountable human review, documented criteria, bias/error evaluation, access control, retention/deletion rules, audit logging, and an appeal/review path.
 
 ## Repository structure
 
 ```text
 .
+├── assets/
+│   └── current-vs-target.svg
+├── docs/
+│   ├── REPAIR_PLAN.md
+│   └── TEST_PLAN.md
+├── workflow/
+│   └── cv_screening_n8n_workflow.json
 ├── index.html
-├── README.md
-└── workflow/
-    └── cv_screening_n8n_workflow.json
+├── SECURITY.md
+├── LICENSE
+└── README.md
 ```
 
 ## Responsible use
 
-AI screening should support—not replace—human judgment. Any real hiring implementation should be tested for bias and false negatives, use documented criteria, provide a review/appeal path, minimize stored personal data, and keep a human accountable for employment decisions.
-
-## License
-
-This project is available under the [MIT License](./LICENSE).
+AI screening should support—not replace—human judgment. A real implementation should minimize stored personal data and keep a person accountable for employment decisions.
 
 ---
 
